@@ -2,7 +2,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics } from "firebase/analytics";
 import { getStorage } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
 
@@ -22,11 +21,12 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-const analytics = getAnalytics(app);
+
 
 // Getting Auth and Firestore Instances
 const auth = getAuth(app);
 const firestore = getFirestore(app); // Firestore instance is named "firestore"
 
-export { firestore, auth }; // Export firestore and auth
+export { firestore, auth, app }; // Export firestore and auth
+ // Export firestore and authS
 

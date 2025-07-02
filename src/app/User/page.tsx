@@ -1,175 +1,162 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import {
-  FaUserCheck,
-  FaMapMarkedAlt,
-  FaHistory,
-  FaClock,
-  FaChevronLeft,
-  FaUniversity,
-} from 'react-icons/fa';
 
-// Lokasi target absensi
-const TARGET_LOCATION = {
-  lat: -6.200000,
-  lng: 106.816666,
-  radius: 100, // meter
-};
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { IoArrowBack } from 'react-icons/io5';
+import { db } from '@/../firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { motion } from 'framer-motion';
 
-// Fungsi menghitung jarak (meter)
-function haversineDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
-  const toRad = (x: number) => (x * Math.PI) / 180;
-  const R = 6371000;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+export default function LoginPage() {
+  const router = useRouter();
 
-// Tipe lokasi pengguna
-type Location = {
-  lat: number;
-  lng: number;
-};
+  const [loginData, setLoginData] = useState({ identifier: '', password: '' });
+  const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
-export default function DashboardUser() {
-  const [location, setLocation] = useState<Location | null>(null);
-  const [isWithinArea, setIsWithinArea] = useState(false);
-  const [message, setMessage] = useState('');
-  const [dateTime, setDateTime] = useState('');
+  const handleNavigate = () => {
+    router.push('/Regist');
+  };
 
-  useEffect(() => {
-    const updateDateTime = () => {
-      const now = new Date();
-      const formatted = now.toISOString().slice(0, 19).replace('T', ' ');
-      setDateTime(formatted);
-    };
-    updateDateTime();
-    const interval = setInterval(updateDateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setLoginData(prev => ({ ...prev, [id]: value }));
+  };
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const coords = pos.coords;
-        const userLocation = { lat: coords.latitude, lng: coords.longitude };
-        setLocation(userLocation);
-        const distance = haversineDistance(
-          userLocation.lat,
-          userLocation.lng,
-          TARGET_LOCATION.lat,
-          TARGET_LOCATION.lng
-        );
-        setIsWithinArea(distance <= TARGET_LOCATION.radius);
-      },
-      (err) => {
-        console.error(err);
-        setMessage('Gagal mendapatkan lokasi. Aktifkan GPS Anda.');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      const usersRef = collection(db, 'users');
+
+      const qEmail = query(
+        usersRef,
+        where('email', '==', loginData.identifier),
+        where('password', '==', loginData.password)
+      );
+
+      const qUsername = query(
+        usersRef,
+        where('username', '==', loginData.identifier),
+        where('password', '==', loginData.password)
+      );
+
+      const [emailSnap, usernameSnap] = await Promise.all([
+        getDocs(qEmail),
+        getDocs(qUsername),
+      ]);
+
+      const userSnap = !emailSnap.empty ? emailSnap : !usernameSnap.empty ? usernameSnap : null;
+
+      if (userSnap && !userSnap.empty) {
+        const userData = userSnap.docs[0].data();
+        const uid = userSnap.docs[0].id;
+
+        // Simpan UID ke localStorage
+        localStorage.setItem('uid', uid);
+
+        setIsSuccess(true);
+        setTimeout(() => {
+          router.push('/User/profile');
+        }, 1500);
+      } else {
+        setError('Email/Username atau Password salah');
       }
-    );
-  }, []);
-
-  const handleAbsen = () => {
-    if (isWithinArea) {
-      setMessage('Absensi berhasil!');
-    } else {
-      setMessage('Anda di luar area absensi.');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Terjadi kesalahan saat login');
     }
   };
 
   return (
-    <div className="bg-[#f7f9fc] min-h-screen flex flex-col">
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside className="w-64 bg-gradient-to-b from-[#1a88cc] to-[#005f99] text-white flex flex-col">
-          <div className="flex items-center gap-2 px-6 py-6 border-b border-white/20">
-            <FaUniversity className="text-xl" />
-            <span className="font-extrabold uppercase text-lg select-none font-times">I'M HERE</span>
+    <div
+      className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-gray-800"
+      style={{
+        backgroundImage:
+          "linear-gradient(to bottom, rgba(11, 0, 40, 0.9), rgba(173, 216, 230, 0.6)), url('/bkg1.jpg')",
+        backgroundBlendMode: 'overlay',
+      }}
+    >
+      <div className="bg-gradient-to-b from-white/90 to-blue-100 p-10 rounded-2xl shadow-xl w-full max-w-md border border-blue-200 relative">
+        <button
+          type="button"
+          onClick={() => router.push('/choose')}
+          className="absolute top-5 left-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <IoArrowBack size={20} />
+        </button>
+
+        <div className="flex justify-center mb-6">
+          <img src="/imhere1.png" alt="IM HERE" className="h-30 w-auto" />
+        </div>
+
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">
+          Log in to <span className="text-blue-800">Im Here !!</span>
+        </h2>
+
+        <form onSubmit={handleLogin}>
+          <div className="mb-4">
+            <label htmlFor="identifier" className="block text-sm font-semibold text-blue-700 mb-2">
+              Email address or username
+            </label>
+            <input
+              type="text"
+              id="identifier"
+              value={loginData.identifier}
+              onChange={handleChange}
+              placeholder="Enter your email or username"
+              className="w-full p-3 rounded-md bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              required
+            />
           </div>
-          <nav className="flex flex-col px-6 py-4 space-y-6 text-sm font-normal opacity-70 font-times">
-            <a className="flex items-center gap-3 hover:opacity-100 transition-opacity duration-200" href="#">
-              <FaUserCheck />
-              Absen Sekarang
-            </a>
-            <a className="flex items-center gap-3 hover:opacity-100 transition-opacity duration-200" href="#">
-              <FaMapMarkedAlt />
-              Lokasi Saya
-            </a>
-            <a className="flex items-center gap-3 hover:opacity-100 transition-opacity duration-200" href="#">
-              <FaHistory />
-              Riwayat Absen
-            </a>
-          </nav>
-          <div className="flex-grow" />
-          <div className="px-6 py-4 border-t border-white/20">
-            <button aria-label="Collapse sidebar" className="w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
-              <FaChevronLeft />
-            </button>
+
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-sm font-semibold text-blue-700 mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={loginData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className="w-full p-3 rounded-md bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              required
+            />
           </div>
-        </aside>
 
-        {/* Main content */}
-        <main className="flex-1 flex flex-col font-times">
-          <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
-            <h1 className="text-xl font-semibold text-gray-800">Dashboard Pengguna</h1>
-            <div className="text-sm text-gray-600 select-none font-times">
-              <FaClock className="inline mr-1 text-gray-400" />
-              <span className="text-green-500 font-medium">{dateTime}</span>
-            </div>
-          </header>
+          {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
 
-          <section className="flex-1 p-8 overflow-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">Status Lokasi</h2>
-                {location ? (
-                  <p className="text-sm text-gray-700">
-                    Latitude: {location.lat.toFixed(6)}<br />
-                    Longitude: {location.lng.toFixed(6)}
-                  </p>
-                ) : (
-                  <p className="text-sm text-red-500">Menunggu lokasi...</p>
-                )}
-              </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Log In
+          </button>
+        </form>
 
-              <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
-                {isWithinArea ? (
-                  <>
-                    <p className="text-green-600 font-semibold mb-2">Anda berada di dalam area absensi.</p>
-                    <button onClick={handleAbsen} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                      Absen Sekarang
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-red-600 font-semibold mb-2">Anda di luar area absensi.</p>
-                    <button disabled className="bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed">
-                      Absen Tidak Tersedia
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-            {message && <p className="mt-4 text-center text-blue-600 text-sm">{message}</p>}
-          </section>
-
-          <footer className="py-4 text-center text-gray-500 text-xs select-none font-times">
-            Present by Azmi Afif
-          </footer>
-        </main>
+        <div className="mt-6 text-center text-sm text-gray-600">
+          Don't have an account?{' '}
+          <button
+            type="button"
+            onClick={handleNavigate}
+            className="text-blue-600 hover:underline"
+          >
+            Sign up for ImHere
+          </button>
+        </div>
       </div>
+
+      {isSuccess && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="absolute top-10 bg-green-100 border border-green-400 text-green-700 px-6 py-3 rounded-lg shadow-md"
+        >
+          🎉 Login berhasil! Selamat datang di <strong>ImHere</strong>!
+        </motion.div>
+      )}
     </div>
   );
 }

@@ -39,12 +39,12 @@ export default function SelectSection() {
 
         {/* Buttons */}
         <div className="flex flex-col gap-4">
-          <Link href="/choose/login_admin">
+          <Link href="/Admin">
             <button className="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold border border-blue-300 py-3 rounded-lg transition">
               ADMIN
             </button>
           </Link>
-          <Link href="/choose/login_user">
+          <Link href="/User">
             <button className="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold border border-blue-300 py-3 rounded-lg transition">
               USER
             </button>

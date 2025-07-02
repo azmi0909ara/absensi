@@ -45,7 +45,7 @@ export default function Register() {
       });
 
       setErrorMsg('');
-      router.push('choose/login_user');
+      router.push('User');
     } catch (error) {
       console.error('Gagal menyimpan data:', error);
       setErrorMsg('Terjadi kesalahan saat registrasi.');
@@ -65,7 +65,7 @@ export default function Register() {
 
         <button
           type="button"
-          onClick={() => router.push('choose/login_user')}
+          onClick={() => router.push('User')}
           className="absolute top-5 left-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <IoArrowBack size={20} />
@@ -91,7 +91,7 @@ export default function Register() {
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="Masukkan username"
-                  className="w-full p-3 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-md border bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -104,7 +104,7 @@ export default function Register() {
                   value={formData.namaLengkap}
                   onChange={handleChange}
                   placeholder="Masukkan nama lengkap"
-                  className="w-full p-3 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-md border bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -117,7 +117,7 @@ export default function Register() {
                   value={formData.noTelp}
                   onChange={handleChange}
                   placeholder="08xxxxxxxxxx"
-                  className="w-full p-3 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-md border bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </>
@@ -134,7 +134,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="email@example.com"
-                  className="w-full p-3 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-md border bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -147,7 +147,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Masukkan password"
-                  className="w-full p-3 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-md border bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -160,7 +160,7 @@ export default function Register() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Ulangi password"
-                  className="w-full p-3 rounded-md border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-md border bg-white border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </>
